@@ -101,6 +101,26 @@ def home():
 def logout():
     session.pop("username", None)
     return redirect(url_for('login'))
+@app.route("/van")
+def van():
+    return render_template("van.html")
+
+@app.route("/malatya")
+def malatya():
+    return render_template("malatya.html")
+
+@app.route("/kars")
+def kars():
+    return render_template("kars.html")
+
+@app.route("/elazig")
+def elazig():
+    return render_template("elazig.html")
+
+@app.route("/erzurum")
+def erzurum():
+    return render_template("erzurum.html")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
