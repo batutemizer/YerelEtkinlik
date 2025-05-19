@@ -3,11 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elazığ</title>
+    <title>Elazığ Etkinlikleri</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        header {
+            background-color: #6c63ff;
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            border-left: 5px solid #6c63ff;
+            padding-left: 1rem;
+            margin: 2rem 0 1rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-date {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .details {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f9f3fe; 
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .details h3 {
+            color: #6c63ff; 
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .details p {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .details ul {
+            margin: 1rem 0;
+            list-style: none;
+            padding: 0;
+        }
+
+        .details ul li {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background-color: #e9ecef;
+            margin-top: 3rem;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background-color: #6c63ff;
+            color: white;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        a.button:hover {
+            background-color: #584ee0;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        a.button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.5);
+        }
+
+        a.button:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #searchInput {
+            padding: 0.75rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Elazığ'a Hoşgeldiniz!</h1>
-    <p>Elazığ hakkında bilgiler burada olacak...</p>
-    <a href="{{ url_for('home') }}">Ana Sayfaya Geri Dön</a>
+
+<header>
+    <h1>Elazığ Etkinlikleri</h1>
+    <p>Konserler, tiyatrolar ve söyleşiler bir arada!</p>
+</header>
+
+<div class="container">
+    <input type="text" id="searchInput" placeholder="Etkinlik ara..." onkeyup="filterEvents()">
+
+    <section>
+        <h2 class="section-title">🎤 Konserler</h2>
+        <div class="card-grid">
+            <div class="card">
+                <img src="https://www.biletwise.com/uploads/category/big/1621113836.jpg" alt="Konser">
+                <div class="card-body">
+                    <div class="card-title">Yüksek Sadakat - Elazığ Konseri</div>
+                    <div class="card-date">12 Mayıs 2025, 20:00 - Elazığ Kültür Park</div>
+                    <div class="card-desc">Rock müziğin güçlü ismi Elazığ’da sahnede!</div>
+                    <button class="button" onclick="toggleDetails('konser1')">Detayları Gör ➡️</button>
+                    <div class="details" id="konser1">
+                        <h3>🎸 Yüksek Sadakat ile Müziğe Doyun 🎶</h3>
+                        <p>Elazığ’da sahne alacak olan Yüksek Sadakat konserinde, unutulmaz bir rock gecesi yaşanacak!</p>
+                        <ul>
+                            <li>🔥 Yüksek Sadakat'in hit şarkıları!</li>
+                            <li>🎤 Sahnede enerjik bir atmosfer!</li>
+                            <li>🎶 Kaçırılmayacak bir konser!</li>
+                        </ul>
+                        <p>Hemen biletinizi alın, müziğin keyfini çıkarın!</p>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </section>
+
+    <section>
+        <h2 class="section-title">🎭 Tiyatrolar</h2>
+        <div class="card-grid">
+            <div class="card">
+                <img src="https://www.sakm.net/images/slider/sakm-tiyatro-banner-2023-aralik.jpeg" alt="Tiyatro">
+                <div class="card-body">
+                    <div class="card-title">Bir Delinin Hatıra Defteri</div>
+                    <div class="card-date">14 Mayıs 2025, 20:00 - Belediye Şehir Tiyatrosu</div>
+                    <div class="card-desc">Gogol’ün ölümsüz eseri tek kişilik performansla sahnede.</div>
+                    <button class="button" onclick="toggleDetails('tiyatro1')">Detayları Gör ➡️</button>
+                    <div class="details" id="tiyatro1">
+                        <h3>🎭 Bir Delinin Hatıra Defteri - Tek Kişilik Performans!</h3>
+                        <p>Bu unutulmaz performansta Gogol’ün ölümsüz eseri sahneye taşınıyor!</p>
+                        <ul>
+                            <li>🎤 Unutulmaz bir oyunculuk deneyimi!</li>
+                            <li>💭 Derin bir düşünce yolculuğu!</li>
+                            <li>🎭 Etkileyici bir sahne deneyimi!</li>
+                        </ul>
+                        <p>Kaçırmayın, bu performansı izleyin!</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <section>
+        <h2 class="section-title">🗣️ Söyleşiler</h2>
+        <div class="card-grid">
+            <div class="card">
+                <img src="https://sahnedragos.com/assets/img/SG-hakkimizda-2.jpg" alt="Söyleşi">
+                <div class="card-body">
+                    <div class="card-title">Tarih ve Medeniyet Üzerine</div>
+                    <div class="card-date">16 Mayıs 2025, 18:00 - Elazığ İl Halk Kütüphanesi</div>
+                    <div class="card-desc">Prof. Dr. Ahmet Şimşirgil ile medeniyet sohbeti.</div>
+                    <button class="button" onclick="toggleDetails('soylesi1')">Detayları Gör ➡️</button>
+                    <div class="details" id="soylesi1">
+                        <h3>📚 Tarih ve Medeniyet Üzerine Derinlemesine Bir Sohbet</h3>
+                        <p>Prof. Dr. Ahmet Şimşirgil ile medeniyet ve tarih üzerine yapılacak derinlemesine bir sohbet.</p>
+                        <ul>
+                            <li>💬 Bilgiyi derinlemesine keşfedin!</li>
+                            <li>📖 Tarihsel olayları daha yakından öğrenin!</li>
+                            <li>🗣️ Kapsamlı bir söyleşi!</li>
+                        </ul>
+                        <p>Bu sohbeti kaçırmamanız gereken bir fırsat!</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <div style="text-align:center; margin-top: 2rem;">
+        <a href="{{ url_for('home') }}" class="button">Ana Sayfaya Geri Dön</a>
+    </div>
+</div>
+
+<footer>
+    &copy; 2025 Elazığ Etkinlikleri. Tüm hakları saklıdır.
+</footer>
+
+<script>
+function filterEvents() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(input) ? 'block' : 'none';
+    });
+}
+
+function toggleDetails(eventId) {
+    const detailsDiv = document.getElementById(eventId);
+    const button = document.querySelector(`[onclick="toggleDetails('${eventId}')"]`);
+
+    if (detailsDiv.style.display === 'block') {
+        detailsDiv.style.display = 'none';
+        button.innerHTML = 'Detayları Gör ➡️';
+    } else {
+        detailsDiv.style.display = 'block';
+        button.innerHTML = 'Detayları Gizle ⬅️';
+    }
+}
+</script>
+
 </body>
 </html>

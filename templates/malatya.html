@@ -1,13 +1,211 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malatya</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Malatya Etkinlikleri</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+      color: #212529;
+    }
+    header {
+      background-color: #0d6efd;
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .section-title {
+      font-size: 1.8rem;
+      border-left: 5px solid #0d6efd;
+      padding-left: 1rem;
+      margin: 2rem 0 1rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card-body {
+      padding: 1rem;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .card-date {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.95rem;
+      color: #444;
+    }
+    .details {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #e3f2fd;
+      border-radius: 8px;
+    }
+    .details h3 {
+      color: #0d6efd;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .details p, .details li {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 0.6rem 1.5rem;
+      background: linear-gradient(135deg, #0d6efd, #6610f2);
+      color: white;
+      font-weight: 600;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      position: relative;
+    }
+    .button::after {
+      content: '➡️';
+      margin-left: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+    .button:hover {
+      background: linear-gradient(135deg, #6610f2, #0d6efd);
+      transform: scale(1.05);
+    }
+    .button.toggle::after {
+      content: '⬅️';
+    }
+
+    #searchInput {
+      padding: 0.75rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      background-color: #e9ecef;
+      margin-top: 3rem;
+    }
+  </style>
 </head>
 <body>
-    <h1>Malatya'ya Hoşgeldiniz!</h1>
-    <p>Malatya hakkında bilgiler burada olacak...</p>
-    <a href="{{ url_for('home') }}">Ana Sayfaya Geri Dön</a>
+
+<header>
+  <h1>Malatya Etkinlikleri</h1>
+  <p>Anadolu’nun kalbinde kültür, sanat ve müzik bir arada!</p>
+</header>
+
+<div class="container">
+  <input type="text" id="searchInput" placeholder="Etkinlik ara..." onkeyup="filterEvents()"/>
+
+  <section>
+    <h2 class="section-title">🎤 Konserler</h2>
+    <div class="card-grid">
+      <div class="card">
+        <img src="https://www.biletwise.com/uploads/category/big/1621113836.jpg" alt="Konser" />
+        <div class="card-body">
+          <div class="card-title">Haluk Levent - Malatya Açıkhava Konseri</div>
+          <div class="card-date">30 Mayıs 2025, 20:30 - Malatya Kongre ve Kültür Merkezi</div>
+          <div class="card-desc">Rock müziğin efsanesi Haluk Levent Malatya’da sahnede!</div>
+          <button class="button" onclick="toggleDetails('konser1')">Detayları Gör</button>
+          <div class="details" id="konser1">
+            <h3>🎸 Unutulmaz Haluk Levent Gecesi</h3>
+            <p>Yılların eskitemediği parçalar eşliğinde duygusal ve enerjik bir konser.</p>
+            <ul>
+              <li>🎤 Canlı performans</li>
+              <li>🌃 Açık hava atmosferi</li>
+              <li>🎫 Biletler hızla tükeniyor!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+
+  <div style="text-align:center; margin-top: 2rem;">
+    <a href="{{ url_for('home') }}" class="button">Ana Sayfaya Geri Dön</a>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 Malatya Etkinlikleri. Tüm hakları saklıdır.
+</footer>
+
+<script>
+function filterEvents() {
+  const input = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(input) ? 'block' : 'none';
+  });
+}
+
+function toggleDetails(id) {
+  const details = document.getElementById(id);
+  const button = document.querySelector(`[onclick="toggleDetails('${id}')"]`);
+  if (details.style.display === 'block') {
+    details.style.display = 'none';
+    button.classList.remove('toggle');
+    button.innerHTML = 'Detayları Gör';
+  } else {
+    details.style.display = 'block';
+    button.classList.add('toggle');
+    button.innerHTML = 'Detayları Gizle';
+  }
+}
+</script>
+
 </body>
 </html>

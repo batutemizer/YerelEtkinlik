@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hakkımızda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 40px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .profile-photo {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #4b6cb7;
+    }
+
+    .intro {
+      flex: 1;
+    }
+
+    .intro h1 {
+      font-size: 28px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .intro p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    .section {
+      margin-top: 40px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #4b6cb7;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    .contact-info p {
+      font-size: 15px;
+      margin: 8px 0;
+    }
+
+    .social-icons a {
+      color: #4b6cb7;
+      font-size: 20px;
+      margin-right: 15px;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .social-icons a:hover {
+      color: #182848;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      font-size: 15px;
+      text-decoration: none;
+      color: #d11a2a;
+      font-weight: 600;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .intro h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      
+      <img src="{{ url_for('static', filename='ben.jpeg') }}" alt="Profil Fotoğrafı" class="profile-photo" />
+      
+      <div class="intro">
+        <h1>Merhaba, ben Batuhan TEMİZER</h1>
+        <p>Bu platformu, şehirlerdeki etkinlikleri daha görünür hale getirmek ve insanların kültürel yaşama daha kolay erişmesini sağlamak amacıyla kurdum. Teknolojiyle sanatı, eğlenceyi ve bilgilendirici etkinlikleri bir araya getiriyoruz.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>İletişim</h2>
+      <div class="contact-info">
+        <p><i class="fas fa-envelope"></i> E-posta: <a href="mailto:temizerbatu@gmail.com">temizerbatu@gmail.com</a></p>
+        <p><i class="fas fa-phone"></i> Telefon: +90 552 264 1898</p>
+        <p><i class="fas fa-map-marker-alt"></i> Adres: Elazığ, Türkiye</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Sosyal Medya</h2>
+      <div class="social-icons">
+        <a href="https://www.instagram.com/batutemizer" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.linkedin.com/in/batuhan-temizer-47a7b726a/" target="_blank"><i class="fab fa-linkedin"></i></a>
+        <a href="https://github.com/batutemizer" target="_blank"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+
+    <a class="back-link" href="http://10.196.186.1:5000/home">← Ana Sayfaya Dön</a>
+  </div>
+</body>
+</html>

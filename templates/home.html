@@ -65,7 +65,6 @@
       cursor: pointer;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
       transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
-      
     }
 
     .city-button i {
@@ -98,27 +97,31 @@
   <div class="container">
     <h1>Hoşgeldiniz, {{ username }}!</h1>
     <p>Bir şehir seçerek devam edebilirsiniz:</p>
+
     <button class="city-button" onclick="window.location.href='/erzurum'">
       <i class="fas fa-map-marker-alt"></i> ERZURUM
     </button>
-    
+
     <button class="city-button" onclick="window.location.href='/van'">
       <i class="fas fa-map-marker-alt"></i> VAN
     </button>
-    
+
     <button class="city-button" onclick="window.location.href='/elazig'">
       <i class="fas fa-map-marker-alt"></i> ELAZIĞ
     </button>
-    
+
     <button class="city-button" onclick="window.location.href='/malatya'">
       <i class="fas fa-map-marker-alt"></i> MALATYA
     </button>
-    
+
     <button class="city-button" onclick="window.location.href='/kars'">
       <i class="fas fa-map-marker-alt"></i> KARS
     </button>
-    
-    
+
+    <!-- HAKKIMIZDA BUTONU -->
+    <button class="city-button" onclick="window.location.href='/hakkimizda'">
+      <i class="fas fa-info-circle"></i> HAKKIMIZDA
+    </button>
 
     <a class="logout-link" href="/logout">Çıkış Yap</a>
   </div>

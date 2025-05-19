@@ -4,15 +4,15 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
-CORS(app)  # React Native istekleri için CORS aktif
+CORS(app)  
 
-# --- Yardımcı Fonksiyon ---
+
 def get_db_connection():
     conn = sqlite3.connect("users.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-# --- WEB: Kayıt Sayfası ---
+
 @app.route("/kayit", methods=["GET", "POST"])
 def kayit():
     if request.method == "POST":
@@ -33,7 +33,7 @@ def kayit():
 
     return render_template("kayit.html")
 
-# --- API: Kayıt ---
+
 @app.route("/api/register", methods=["POST"])
 def api_register():
     data = request.get_json()
@@ -52,7 +52,7 @@ def api_register():
         except sqlite3.IntegrityError:
             return jsonify({"success": False, "message": "Bu kullanıcı adı zaten alınmış."})
 
-# --- WEB: Giriş Sayfası ---
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -72,10 +72,10 @@ def login():
 
     return render_template("login.html")
 
-# --- API: Giriş ---
+
 @app.route("/api/login", methods=["POST"])
 def api_login():
-    data = request.get_json()  # JSON verisini alıyoruz
+    data = request.get_json()  
     username = data.get("username")
     password = data.get("password")
 
@@ -89,14 +89,14 @@ def api_login():
         else:
             return jsonify({"success": False, "message": "Kullanıcı adı veya şifre yanlış."})
 
-# --- Ana Sayfa ---
+
 @app.route("/home")
 def home():
     if "username" not in session:
         return redirect(url_for('login'))
     return render_template("home.html", username=session["username"])
 
-# --- Çıkış ---
+
 @app.route("/logout")
 def logout():
     session.pop("username", None)
@@ -120,6 +120,11 @@ def elazig():
 @app.route("/erzurum")
 def erzurum():
     return render_template("erzurum.html")
+
+@app.route('/hakkimizda')
+def hakkimizda():
+    return render_template('hakkimizda.html')
+
 
 
 if __name__ == "__main__":
