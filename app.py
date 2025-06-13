@@ -25,6 +25,11 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Veritabanı tablolarını oluştur
+with app.app_context():
+    db.create_all()
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
