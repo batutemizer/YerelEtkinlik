@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin Kullanıcıya Mesaj Gönder</h2>
+<form method="POST">
+    <label for="receiver_id">Admin Seç:</label>
+    <select name="receiver_id" required>
+        {% for admin in admins %}
+            <option value="{{ admin.id }}">{{ admin.username }}</option>
+        {% endfor %}
+    </select>
+    <br><br>
+    <label for="content">Mesajınız:</label><br>
+    <textarea name="content" rows="4" cols="50" required></textarea>
+    <br><br>
+    <button type="submit">Gönder</button>
+</form>
+{% endblock %} 

@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
-from models import db, User, Event
+from models import db, User, Event, Message
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 
@@ -345,6 +345,28 @@ def update_profile():
 
     flash('Profil bilgileriniz başarıyla güncellendi.', 'success')
     return redirect(url_for('profile'))
+
+@app.route('/mesaj_gonder', methods=['GET', 'POST'])
+@login_required
+def mesaj_gonder():
+    admins = User.query.filter_by(is_admin=True).all()
+    if request.method == 'POST':
+        content = request.form['content']
+        receiver_id = request.form['receiver_id']
+        message = Message(sender_id=current_user.id, receiver_id=receiver_id, content=content)
+        db.session.add(message)
+        db.session.commit()
+        flash('Mesajınız admin kullanıcıya gönderildi!', 'success')
+        return redirect(url_for('index'))
+    return render_template('mesaj_gonder.html', admins=admins)
+
+@app.route('/admin/mesajlar')
+@login_required
+def admin_mesajlar():
+    if not current_user.is_admin:
+        abort(403)
+    messages = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.timestamp.desc()).all()
+    return render_template('admin_mesajlar.html', messages=messages)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

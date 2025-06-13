@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Gelen Mesajlar</h2>
+<table border="1">
+    <tr>
+        <th>Gönderen</th>
+        <th>Mesaj</th>
+        <th>Tarih</th>
+    </tr>
+    {% for msg in messages %}
+    <tr>
+        <td>{{ msg.sender_id }}</td>
+        <td>{{ msg.content }}</td>
+        <td>{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %} 
