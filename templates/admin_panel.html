@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Yerel Etkinlik{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-3">Admin Panel</h1>
+            <p class="lead text-muted">Sistem yönetimi ve istatistikler</p>
+        </div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-users me-2"></i>Toplam Kullanıcı
+                    </h5>
+                    <p class="display-6">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-calendar-check me-2"></i>Onaylı Etkinlik
+                    </h5>
+                    <p class="display-6">{{ approved_events|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-clock me-2"></i>Onay Bekleyen
+                    </h5>
+                    <p class="display-6">{{ pending_events|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-calendar-alt me-2"></i>Toplam Etkinlik
+                    </h5>
+                    <p class="display-6">{{ total_events }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onay Bekleyen Etkinlikler -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="fas fa-clock me-2"></i>Onay Bekleyen Etkinlikler
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if pending_events %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Etkinlik</th>
+                            <th>Organizatör</th>
+                            <th>Tarih</th>
+                            <th>Konum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in pending_events %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="text-decoration-none">
+                                    {{ event.title }}
+                                </a>
+                            </td>
+                            <td>{{ event.user.username }}</td>
+                            <td>{{ event.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ event.location }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <form method="POST" action="{{ url_for('approve_event', event_id=event.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check me-1"></i>Onayla
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('reject_event', event_id=event.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times me-1"></i>Reddet
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i>Onay bekleyen etkinlik bulunmuyor.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Kullanıcı Yönetimi -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-users me-2"></i>Kullanıcı Yönetimi
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-posta</th>
+                            <th>Kayıt Tarihi</th>
+                            <th>Rol</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.created_at %}
+                                    {{ user.created_at.strftime('%d/%m/%Y') }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_admin %}
+                                <span class="badge bg-danger">Admin</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Kullanıcı</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if not user.is_admin %}
+                                    <form method="POST" action="{{ url_for('make_admin', user_id=user.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-user-shield me-1"></i>Admin Yap
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')">
+                                            <i class="fas fa-trash me-1"></i>Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tüm Etkinlikler -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar-alt me-2"></i>Tüm Etkinlikler
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Etkinlik</th>
+                            <th>Organizatör</th>
+                            <th>Tarih</th>
+                            <th>Konum</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in all_events %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="text-decoration-none">
+                                    {{ event.title }}
+                                </a>
+                            </td>
+                            <td>{{ event.user.username }}</td>
+                            <td>{{ event.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ event.location }}</td>
+                            <td>
+                                {% if event.is_approved %}
+                                <span class="badge bg-success">Onaylı</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Onay Bekliyor</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if not event.is_approved %}
+                                    <form method="POST" action="{{ url_for('approve_event', event_id=event.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check me-1"></i>Onayla
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu etkinliği silmek istediğinizden emin misiniz?')">
+                                            <i class="fas fa-trash me-1"></i>Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,133 +1,339 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-import sqlite3
-from flask_cors import CORS
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import os
+from datetime import datetime
+from models import db, User, Event
+from flask_migrate import Migrate
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"
-CORS(app)  
+app.config['SECRET_KEY'] = 'your-secret-key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///events.db'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Upload klasörünü oluştur
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
-def get_db_connection():
-    conn = sqlite3.connect("users.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+db.init_app(app)
+migrate = Migrate(app, db)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-@app.route("/kayit", methods=["GET", "POST"])
-def kayit():
-    if request.method == "POST":
-        username = request.form["username"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        password = request.form["password"]
+# Ana sayfa
+@app.route('/')
+def index():
+    events = Event.query.filter_by(is_approved=True).order_by(Event.date.desc()).all()
+    return render_template('index.html', events=events)
 
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute("INSERT INTO users (username, email, phone, password) VALUES (?, ?, ?, ?)",
-                               (username, email, phone, password))
-                conn.commit()
-                return render_template("kayit.html", success=True)
-            except sqlite3.IntegrityError:
-                return render_template("kayit.html", error="Bu kullanıcı adı zaten alınmış.")
+# Etkinlikler sayfası
+@app.route('/etkinlikler')
+def events():
+    events = Event.query.filter_by(is_approved=True).order_by(Event.date.desc()).all()
+    return render_template('etkinlikler.html', events=events)
 
-    return render_template("kayit.html")
+# Etkinlik detay sayfası
+@app.route('/etkinlik/<int:event_id>')
+def event_detail(event_id):
+    event = Event.query.get_or_404(event_id)
+    return render_template('etkinlik_detay.html', event=event)
 
+# Etkinlik oluşturma
+@app.route('/etkinlik/olustur', methods=['GET', 'POST'])
+@login_required
+def create_event():
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
+        location = request.form['location']
+        max_participants = request.form['max_participants']
+        
+        event = Event(
+            title=title,
+            description=description,
+            date=date,
+            location=location,
+            max_participants=max_participants,
+            user_id=current_user.id
+        )
+        
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                event.image = filename
+        
+        db.session.add(event)
+        db.session.commit()
+        flash('Etkinlik başarıyla oluşturuldu ve onay bekliyor.')
+        return redirect(url_for('events'))
+    
+    return render_template('etkinlik_olustur.html')
 
-@app.route("/api/register", methods=["POST"])
-def api_register():
-    data = request.get_json()
-    username = data.get("username")
-    email = data.get("email")
-    phone = data.get("phone")
-    password = data.get("password")
+# Etkinliğe katılma
+@app.route('/join_event/<int:event_id>', methods=['POST'])
+@login_required
+def join_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    
+    # Etkinlik onaylanmış mı kontrol et
+    if not event.is_approved:
+        flash('Bu etkinliğe henüz katılamazsınız.', 'warning')
+        return redirect(url_for('event_detail', event_id=event_id))
+    
+    # Kullanıcı zaten katılmış mı kontrol et
+    if current_user in event.participants.all():
+        flash('Bu etkinliğe zaten katıldınız.', 'info')
+        return redirect(url_for('event_detail', event_id=event_id))
+    
+    # Etkinlik dolu mu kontrol et
+    if len(event.participants.all()) >= event.max_participants:
+        flash('Üzgünüz, etkinlik kontenjanı dolmuştur.', 'warning')
+        return redirect(url_for('event_detail', event_id=event_id))
+    
+    # Etkinliğe katıl
+    event.participants.append(current_user)
+    db.session.commit()
+    
+    flash('Etkinliğe başarıyla katıldınız!', 'success')
+    return redirect(url_for('event_detail', event_id=event_id))
 
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        try:
-            cursor.execute("INSERT INTO users (username, email, phone, password) VALUES (?, ?, ?, ?)",
-                           (username, email, phone, password))
-            conn.commit()
-            return jsonify({"success": True, "message": "Kayıt başarılı."})
-        except sqlite3.IntegrityError:
-            return jsonify({"success": False, "message": "Bu kullanıcı adı zaten alınmış."})
+# Admin paneli ana sayfası
+@app.route('/admin')
+@login_required
+def admin_panel():
+    if not current_user.is_admin:
+        flash('Bu sayfaya erişim yetkiniz yok.', 'danger')
+        return redirect(url_for('index'))
+    
+    # İstatistikler
+    total_users = User.query.count()
+    approved_events = Event.query.filter_by(is_approved=True).all()
+    pending_events = Event.query.filter_by(is_approved=False).all()
+    total_events = Event.query.count()
+    
+    # Kullanıcılar ve etkinlikler
+    users = User.query.all()
+    all_events = Event.query.all()
+    
+    return render_template('admin_panel.html',
+                         total_users=total_users,
+                         approved_events=approved_events,
+                         pending_events=pending_events,
+                         total_events=total_events,
+                         users=users,
+                         all_events=all_events)
 
+@app.route('/admin/event/<int:event_id>/approve', methods=['POST'])
+@login_required
+def approve_event(event_id):
+    if not current_user.is_admin:
+        flash('Bu işlem için yetkiniz yok.', 'danger')
+        return redirect(url_for('index'))
+    
+    event = Event.query.get_or_404(event_id)
+    event.is_approved = True
+    db.session.commit()
+    
+    flash('Etkinlik başarıyla onaylandı.', 'success')
+    return redirect(url_for('admin_panel'))
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+@app.route('/admin/event/<int:event_id>/reject', methods=['POST'])
+@login_required
+def reject_event(event_id):
+    if not current_user.is_admin:
+        flash('Bu işlem için yetkiniz yok.', 'danger')
+        return redirect(url_for('index'))
+    
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    
+    flash('Etkinlik reddedildi ve silindi.', 'success')
+    return redirect(url_for('admin_panel'))
 
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-            user = cursor.fetchone()
+@app.route('/admin/user/<int:user_id>/make-admin', methods=['POST'])
+@login_required
+def make_admin(user_id):
+    if not current_user.is_admin:
+        flash('Bu işlem için yetkiniz yok.', 'danger')
+        return redirect(url_for('index'))
+    
+    user = User.query.get_or_404(user_id)
+    user.is_admin = True
+    db.session.commit()
+    
+    flash(f'{user.username} kullanıcısı admin yapıldı.', 'success')
+    return redirect(url_for('admin_panel'))
 
-            if user:
-                session["username"] = username
-                return redirect(url_for('home'))
-            else:
-                return render_template("login.html", error="Kullanıcı adı veya şifre yanlış.")
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_admin:
+        flash('Bu işlem için yetkiniz yok.', 'danger')
+        return redirect(url_for('index'))
+    
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('Kendinizi silemezsiniz.', 'danger')
+        return redirect(url_for('admin_panel'))
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'{user.username} kullanıcısı silindi.', 'success')
+    return redirect(url_for('admin_panel'))
 
-    return render_template("login.html")
+@app.route('/admin/event/<int:event_id>/delete', methods=['POST'])
+@login_required
+def delete_event(event_id):
+    if not current_user.is_admin:
+        flash('Bu işlem için yetkiniz yok.', 'danger')
+        return redirect(url_for('index'))
+    
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    
+    flash('Etkinlik başarıyla silindi.', 'success')
+    return redirect(url_for('admin_panel'))
 
+@app.route('/kayit', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        phone = request.form['phone']
+        password = request.form['password']
+        password2 = request.form['password2']
+        
+        if password != password2:
+            flash('Şifreler eşleşmiyor.')
+            return redirect(url_for('register'))
+        
+        if User.query.filter_by(username=username).first():
+            flash('Bu kullanıcı adı zaten kullanılıyor.')
+            return redirect(url_for('register'))
+        
+        if User.query.filter_by(email=email).first():
+            flash('Bu email adresi zaten kullanılıyor.')
+            return redirect(url_for('register'))
+        
+        if User.query.filter_by(phone=phone).first():
+            flash('Bu telefon numarası zaten kullanılıyor.')
+            return redirect(url_for('register'))
+        
+        user = User(username=username, email=email, phone=phone)
+        user.set_password(password)
+        verification_code = user.generate_verification_code()
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        # Doğrulama sayfasına yönlendir
+        return render_template('dogrulama.html', verification_code=verification_code)
+    
+    return render_template('kayit.html')
 
-@app.route("/api/login", methods=["POST"])
-def api_login():
-    data = request.get_json()  
-    username = data.get("username")
-    password = data.get("password")
-
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-        user = cursor.fetchone()
-
-        if user:
-            return jsonify({"success": True, "message": "Giriş başarılı."})
-        else:
-            return jsonify({"success": False, "message": "Kullanıcı adı veya şifre yanlış."})
-
-
-@app.route("/home")
-def home():
-    if "username" not in session:
+@app.route('/verify-phone', methods=['POST'])
+def verify_phone():
+    code = request.form.get('verification_code')
+    user = User.query.filter_by(verification_code=code).first()
+    
+    if user:
+        user.is_verified = True
+        user.verification_code = None  # Kodu temizle
+        db.session.commit()
+        flash('Telefon numaranız başarıyla doğrulandı! Şimdi giriş yapabilirsiniz.', 'success')
         return redirect(url_for('login'))
-    return render_template("home.html", username=session["username"])
+    else:
+        flash('Geçersiz doğrulama kodu.', 'danger')
+        return redirect(url_for('register'))
 
+@app.route('/resend-code')
+def resend_code():
+    # Bu fonksiyon gerçek bir SMS gönderimi yapmaz
+    # Sadece yeni bir kod oluşturur ve gösterir
+    user = User.query.filter_by(is_verified=False).order_by(User.id.desc()).first()
+    if user:
+        verification_code = user.generate_verification_code()
+        db.session.commit()
+        return render_template('dogrulama.html', verification_code=verification_code)
+    return redirect(url_for('register'))
 
-@app.route("/logout")
+@app.route('/giris', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password):
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('index'))
+        
+        flash('Geçersiz kullanıcı adı veya şifre.')
+    
+    return render_template('giris.html')
+
+@app.route('/logout')
+@login_required
 def logout():
-    session.pop("username", None)
-    return redirect(url_for('login'))
-@app.route("/van")
-def van():
-    return render_template("van.html")
+    logout_user()
+    flash('Başarıyla çıkış yaptınız.')
+    return redirect(url_for('index'))
 
-@app.route("/malatya")
-def malatya():
-    return render_template("malatya.html")
+@app.route('/profil')
+@login_required
+def profile():
+    return render_template('profil.html')
 
-@app.route("/kars")
-def kars():
-    return render_template("kars.html")
+@app.route('/profil/guncelle', methods=['POST'])
+@login_required
+def update_profile():
+    username = request.form.get('username')
+    email = request.form.get('email')
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
 
-@app.route("/elazig")
-def elazig():
-    return render_template("elazig.html")
+    # Kullanıcı adı ve email kontrolü
+    if username != current_user.username:
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Bu kullanıcı adı zaten kullanılıyor.', 'danger')
+            return redirect(url_for('profile'))
 
-@app.route("/erzurum")
-def erzurum():
-    return render_template("erzurum.html")
+    if email != current_user.email:
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            flash('Bu e-posta adresi zaten kullanılıyor.', 'danger')
+            return redirect(url_for('profile'))
 
-@app.route('/hakkimizda')
-def hakkimizda():
-    return render_template('hakkimizda.html')
+    # Şifre değişikliği kontrolü
+    if current_password and new_password:
+        if not current_user.check_password(current_password):
+            flash('Mevcut şifre yanlış.', 'danger')
+            return redirect(url_for('profile'))
+        current_user.set_password(new_password)
 
+    # Profil bilgilerini güncelle
+    current_user.username = username
+    current_user.email = email
+    db.session.commit()
 
+    flash('Profil bilgileriniz başarıyla güncellendi.', 'success')
+    return redirect(url_for('profile'))
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
+if __name__ == '__main__':
+    app.run(debug=True) 

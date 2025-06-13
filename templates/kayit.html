@@ -1,92 +1,62 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kayıt Ol</title>
-  <style>
-    body {
-      background: url('{{ url_for("static", filename="back.jpg") }}') no-repeat center center fixed;
-      background-size: cover;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+{% extends "base.html" %}
 
-    .form-container {
-      background-color: rgba(255, 255, 255, 0.95);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
+{% block title %}Kayıt Ol - Yerel Etkinlik{% endblock %}
 
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 16px;
-    }
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Kayıt Ol</h3>
+                    
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-info">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
 
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+                    <form method="POST" action="{{ url_for('register') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
 
-    button:hover {
-      background-color: #218838;
-    }
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Telefon Numarası</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   pattern="[0-9]{10}" placeholder="5XX XXX XX XX" required>
+                            <small class="form-text text-muted">Başında 0 olmadan 10 haneli numaranızı girin</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Şifre</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
 
-    .form-footer a {
-      display: block;
-      margin-top: 15px;
-      color: #007bff;
-      text-decoration: none;
-    }
+                        <div class="mb-3">
+                            <label for="password2" class="form-label">Şifre Tekrar</label>
+                            <input type="password" class="form-control" id="password2" name="password2" required>
+                        </div>
 
-    .form-footer a:hover {
-      text-decoration: underline;
-    }
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+                        </div>
+                    </form>
 
-    .success-message {
-      color: green;
-      font-weight: bold;
-    }
-
-    .error-message {
-      color: red;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="form-container">
-    <h2>Kayıt Ol</h2>
-    {% if success %}
-      <p class="success-message">Başarıyla Kayıt Oldunuz!</p>
-    {% elif error %}
-      <p class="error-message">{{ error }}</p>
-    {% endif %}
-    <form method="POST">
-      <input type="text" name="username" placeholder="Kullanıcı Adı" required />
-      <input type="email" name="email" placeholder="E-posta" required />
-      <input type="tel" name="phone" placeholder="Telefon Numarası" required />
-      <input type="password" name="password" placeholder="Şifre" required />
-      <button type="submit">Kayıt Ol</button>
-    </form>
-    <div class="form-footer">
-      <a href="/login">Zaten hesabım var, giriş yap</a>
+                    <div class="text-center mt-3">
+                        <p>Zaten hesabınız var mı? <a href="{{ url_for('login') }}">Giriş Yap</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</body>
-</html>
-
+</div>
+{% endblock %} 

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa - Yerel Etkinlik{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-4 mb-4">Yerel Etkinliklere Katılın</h1>
+        <p class="lead mb-4">Şehrinizdeki etkinlikleri keşfedin, yeni insanlarla tanışın ve unutulmaz deneyimler yaşayın.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('events') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-calendar-alt me-2"></i>Etkinlikleri Keşfet
+            </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('create_event') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Etkinlik Oluştur
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Neden Yerel Etkinlik?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h3 class="h5">Topluluk</h3>
+                        <p class="text-muted">Yeni insanlarla tanışın ve topluluk ruhunu yaşayın.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                        <h3 class="h5">Yerel</h3>
+                        <p class="text-muted">Şehrinizdeki etkinlikleri keşfedin ve katılın.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                        <h3 class="h5">Kolay Organizasyon</h3>
+                        <p class="text-muted">Etkinliklerinizi kolayca oluşturun ve yönetin.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events Section -->
+<section class="events-section py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Yaklaşan Etkinlikler</h2>
+            <a href="{{ url_for('events') }}" class="btn btn-outline-primary">
+                Tüm Etkinlikler <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for event in events %}
+            <div class="col">
+                <div class="card h-100 event-card">
+                    {% if event.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + event.image) }}" class="card-img-top" alt="{{ event.title }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/default-event.jpg') }}" class="card-img-top" alt="Varsayılan Etkinlik Görseli">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.title }}</h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-calendar-alt me-2"></i>{{ event.date.strftime('%d/%m/%Y %H:%M') }}
+                        </p>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ event.location }}
+                        </p>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-users me-2"></i>{{ event.participants.all()|length }}/{{ event.max_participants }}
+                        </p>
+                        <p class="card-text">{{ event.description[:100] }}...</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle me-2"></i>Detaylar
+                            </a>
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.id != event.user_id %}
+                                    {% if event.is_approved %}
+                                        {% if current_user not in event.participants.all() %}
+                                            {% if event.participants.all()|length < event.max_participants %}
+                                            <form method="POST" action="{{ url_for('join_event', event_id=event.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-user-plus me-2"></i>Katıl
+                                                </button>
+                                            </form>
+                                            {% else %}
+                                            <button class="btn btn-secondary" disabled>
+                                                <i class="fas fa-user-slash me-2"></i>Dolu
+                                            </button>
+                                            {% endif %}
+                                        {% else %}
+                                            <button class="btn btn-success" disabled>
+                                                <i class="fas fa-check me-2"></i>Katıldınız
+                                            </button>
+                                        {% endif %}
+                                    {% else %}
+                                        <button class="btn btn-warning" disabled>
+                                            <i class="fas fa-clock me-2"></i>Onay Bekliyor
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Henüz etkinlik bulunmuyor.
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('create_event') }}" class="alert-link ms-2">
+                        <i class="fas fa-plus-circle me-1"></i>İlk Etkinliği Oluştur
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="mb-4">Etkinliklerden Haberdar Olun</h2>
+                <p class="text-muted mb-4">Yeni etkinliklerden haberdar olmak için bültenimize abone olun.</p>
+                <form class="newsletter-form">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="E-posta adresiniz" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Abone Ol
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

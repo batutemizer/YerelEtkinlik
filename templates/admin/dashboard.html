@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Paneli - Yerel Etkinlik{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Admin Paneli</h1>
+
+<div class="row">
+    <!-- Onay Bekleyen Etkinlikler -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Onay Bekleyen Etkinlikler</h4>
+            </div>
+            <div class="card-body">
+                {% if pending_events %}
+                <div class="list-group">
+                    {% for event in pending_events %}
+                    <div class="list-group-item">
+                        <h5 class="mb-1">{{ event.title }}</h5>
+                        <p class="mb-1">Organizatör: {{ event.user.username }}</p>
+                        <p class="mb-1">Tarih: {{ event.date.strftime('%d/%m/%Y %H:%M') }}</p>
+                        <div class="btn-group mt-2">
+                            <form method="POST" action="{{ url_for('approve_event', event_id=event.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm">Onayla</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu etkinliği silmek istediğinizden emin misiniz?')">Sil</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Onay bekleyen etkinlik yok.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tüm Etkinlikler -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Tüm Etkinlikler</h4>
+            </div>
+            <div class="card-body">
+                {% if all_events %}
+                <div class="list-group">
+                    {% for event in all_events %}
+                    <div class="list-group-item">
+                        <h5 class="mb-1">{{ event.title }}</h5>
+                        <p class="mb-1">Organizatör: {{ event.user.username }}</p>
+                        <p class="mb-1">Tarih: {{ event.date.strftime('%d/%m/%Y %H:%M') }}</p>
+                        <p class="mb-1">Durum: {% if event.is_approved %}Onaylı{% else %}Onay Bekliyor{% endif %}</p>
+                        <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu etkinliği silmek istediğinizden emin misiniz?')">Sil</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Henüz etkinlik yok.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanıcı Yönetimi -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Kullanıcı Yönetimi</h4>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı Adı</th>
+                                <th>E-posta</th>
+                                <th>Admin</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{% if user.is_admin %}Evet{% else %}Hayır{% endif %}</td>
+                                <td>
+                                    {% if not user.is_admin %}
+                                    <form method="POST" action="{{ url_for('make_admin', user_id=user.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-warning btn-sm">Admin Yap</button>
+                                    </form>
+                                    {% endif %}
+                                    {% if user.id != current_user.id %}
+                                    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')">Sil</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Henüz kullanıcı yok.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

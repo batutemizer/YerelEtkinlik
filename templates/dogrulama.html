@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Telefon Doğrulama</h3>
+                    
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-info">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="alert alert-info">
+                        <p>Doğrulama kodunuz: <strong>{{ verification_code }}</strong></p>
+                        <p>Bu kodu telefonunuza gelen SMS ile karşılaştırın.</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('verify_phone') }}">
+                        <div class="mb-3">
+                            <label for="verification_code" class="form-label">Doğrulama Kodu</label>
+                            <input type="text" class="form-control" id="verification_code" 
+                                   name="verification_code" pattern="[0-9]{6}" maxlength="6" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Doğrula</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>Kod gelmedi mi? <a href="{{ url_for('resend_code') }}">Tekrar Gönder</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

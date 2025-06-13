@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Profil Bilgileri -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Profil Bilgileri</h3>
+                    <form method="POST" action="{{ url_for('update_profile') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ current_user.username }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Mevcut Şifre</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Yeni Şifre</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Profili Güncelle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oluşturulan Etkinlikler -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Oluşturduğum Etkinlikler</h3>
+                    {% if current_user.created_events %}
+                        <div class="row">
+                            {% for event in current_user.created_events %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    {% if event.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + event.image) }}" class="card-img-top" alt="{{ event.title }}">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ event.title }}</h5>
+                                        <p class="card-text">{{ event.description[:100] }}...</p>
+                                        <p class="card-text"><small class="text-muted">{{ event.date.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">Detayları Gör</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Henüz etkinlik oluşturmadınız.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Katıldığım Etkinlikler -->
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Katıldığım Etkinlikler</h3>
+                    {% if current_user.participated_events %}
+                        <div class="row">
+                            {% for event in current_user.participated_events %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    {% if event.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + event.image) }}" class="card-img-top" alt="{{ event.title }}">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ event.title }}</h5>
+                                        <p class="card-text">{{ event.description[:100] }}...</p>
+                                        <p class="card-text"><small class="text-muted">{{ event.date.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">Detayları Gör</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Henüz bir etkinliğe katılmadınız.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

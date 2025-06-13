@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Etkinlik Oluştur - Yerel Etkinlik{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Yeni Etkinlik Oluştur</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Etkinlik Başlığı</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Etkinlik Açıklaması</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Etkinlik Tarihi ve Saati</label>
+                        <input type="datetime-local" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Etkinlik Konumu</label>
+                        <input type="text" class="form-control" id="location" name="location" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="max_participants" class="form-label">Maksimum Katılımcı Sayısı</label>
+                        <input type="number" class="form-control" id="max_participants" name="max_participants" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Etkinlik Görseli</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <small class="text-muted">İsteğe bağlı. Maksimum dosya boyutu: 5MB</small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Etkinlik Oluştur</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
