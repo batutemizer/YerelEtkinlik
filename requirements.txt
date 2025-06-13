@@ -10,4 +10,7 @@ Flask-WTF==1.2.1
 Flask-Migrate==4.0.5
 email-validator==2.1.0.post1
 Pillow==10.2.0
-python-dotenv==1.0.1 
+python-dotenv==1.0.1
+gunicorn==21.2.0
+alembic==1.13.1
+SQLAlchemy==2.0.27 
